@@ -95,6 +95,26 @@ filtered_data <- df$butterfly_abundance[df$butterfly_abundance >= lower_bound & 
 mean_without_outliers <- mean(filtered_data)
 # Print the result
 mean_without_outliers
+# Calculate IQR and mean without outliers for hedge height column
+Q1hh <- quantile(df$hedge_height, 0.25)
+Q3hh <- quantile(df$hedge_height, 0.75)
+IQR_valuehh <- Q3hh - Q1hh
+lower_boundhh <- Q1hh - 1.5 * IQR_valuehh
+upper_boundhh <- Q3hh + 1.5 * IQR_valuehh
+lower_boundhh
+upper_boundhh
+filtered_datahh <- df$hedge_height[df$hedge_height >= lower_boundhh & df$hedge_height <= upper_boundhh]
+mean_without_outliershh <- mean(filtered_datahh)
+# Calculate IQR and mean without outliers for veget. density column
+Q1vd <- quantile(df$vegetation_density, 0.25)
+Q3vd <- quantile(df$vegetation_density, 0.75)
+IQR_valuevd <- Q3vd - Q1vd
+lower_boundvd <- Q1vd - 1.5 * IQR_valuevd
+upper_boundvd <- Q3vd + 1.5 * IQR_valuevd
+lower_boundvd
+upper_boundvd
+filtered_datavd <- df$vegetation_density[df$vegetation_density >= lower_boundvd & df$vegetation_density <= upper_boundvd]
+mean_without_outliersvd <- mean(filtered_datavd)
 # Standardise the dataset using Z-scores
 df_zscores <- scale(df)
 df_zscores
