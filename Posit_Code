@@ -1,0 +1,275 @@
+install.packages("dplyr")
+install.packages("tidyverse")
+install.packages("janitor")
+library(dplyr)
+library(tidyverse)
+library(janitor)
+
+# View the dataset in a tabular format
+df <- Common_Blue
+View(df)
+# Remove rows with any missing values
+df <- na.omit(Common_Blue)
+# Convert all column names to lowercase
+colnames(df) <- tolower(colnames(df))
+#Summary stats
+summary(df)
+# Calculate the mean and median for butterfly abundance
+mean_butterfly <- mean(df$butterfly_abundance)
+median_butterfly <- median(df$butterfly_abundance)
+# Display the results
+mean_butterfly
+median_butterfly
+#mean and median for all other variables
+mean_hedge <- mean(df$hedge_height)
+median_hedge <- median(df$hedge_height)
+mean_hedge
+median_hedge
+mean_temp <- mean(df$average_temperature)
+median_temp <- median(df$average_temperature)
+mean_temp
+median_temp
+mean_vege <- mean(df$vegetation_density)
+median_vege <- median(df$vegetation_density)
+mean_vege
+median_vege
+mean_polli <- mean(df$pollinator_abundance)
+median_polli <- median(df$pollinator_abundance)
+mean_polli
+median_polli
+
+# Create boxplots for all variables in the df dataset
+boxplot(df, main = "Boxplot for All Variables",
+        col = "lightblue",
+        border = "darkblue",
+        outline = TRUE)
+#See colors
+colors()
+#create boxplot with amended labels and colours
+par(mar=c(3,9,2,1))
+boxplot(df, las = 2, names = c("Butterfly Abundance", "Hedge Height","Av. Temperature","Vegetation Density", "Pollinator Abundance"), main = "Boxplot for All Variables",
+        col = c("royalblue2","red","sienna","palevioletred","lightblue"),
+        border = "darkblue",
+        outline = TRUE, log = "x", horizontal=TRUE)
+#create boxplot with amended labels - vertical test
+par(mar=c(9,3,2,1))
+boxplot(df, las = 2, names = c("Butterfly Abundance", "Hedge Height","Av. Temperature","Vegetation Density", "Pollinator Abundance"), main = "Boxplot for All Variables",
+        col = c("royalblue2","red","sienna","palevioletred","lightblue"),
+        border = "darkblue",
+        outline = TRUE)
+# Loop through each column in the df dataset and plot histograms for numeric columns
+for (col in colnames(df)) {
+  # Check if the column is numeric
+  if (is.numeric(df[[col]])) {
+    # Plot the histogram for the numeric column
+    hist(df[[col]], main = paste(col, "Distribution"), xlab = col, col = "lightblue", border = "darkblue")
+  }
+}
+  # Calculate measures of dispersion for butterfly abundance
+  range_butterfly <- range(df$butterfly_abundance)
+  iqr_butterfly <- IQR(df$butterfly_abundance)
+  variance_butterfly <- var(df$butterfly_abundance)
+  sd_butterfly <- sd(df$butterfly_abundance)
+  # Display the results
+  range_butterfly
+  iqr_butterfly
+  variance_butterfly
+  sd_butterfly
+}
+# Calculate IQR for butterfly_abundance column
+Q1 <- quantile(df$butterfly_abundance, 0.25)
+Q3 <- quantile(df$butterfly_abundance, 0.75)
+IQR_value <- Q3 - Q1
+#show the results
+Q1
+Q3
+IQR_value
+# Define the thresholds for outliers
+lower_bound <- Q1 - 1.5 * IQR_value
+upper_bound <- Q3 + 1.5 * IQR_value
+lower_bound
+upper_bound
+# Filter out the outliers
+filtered_data <- df$butterfly_abundance[df$butterfly_abundance >= lower_bound & df$butterfly_abundance <= upper_bound]
+# Calculate the mean of butterfly_abundance without outliers
+mean_without_outliers <- mean(filtered_data)
+# Print the result
+mean_without_outliers
+# Standardise the dataset using Z-scores
+df_zscores <- scale(df)
+df_zscores
+print(df_zscores)
+View(df_zscores)
+# View the standardised data
+head(df_zscores)
+# Create boxplots for all variables in the df dataset
+boxplot(df_zscores, main = "Standardised Boxplot for All Variables (df Z Scores)",las = 2, names = c("Butterfly Abundance", "Hedge Height","Av. Temperature","Vegetation Density", "Pollinator Abundance"),
+        col = c("royalblue2","red","sienna","palevioletred","lightblue"),
+        border = "darkblue",
+        outline = TRUE,)
+# Density plot for butterfly abundance
+plot(density(df$butterfly_abundance), main="Density Plot of Butterfly Abundance", xlab="Butterfly Abundance")
+# Density plot for each other variable
+plot(density(df$hedge_height), main="Density Plot of Hedge Height", xlab="Hedge Height")
+plot(density(df$average_temperature), main="Density Plot of average temperature", xlab="Average Temperature")
+plot(density(df$vegetation_density), main="Density Plot of Vegetation Density", xlab="Vegetation Density")
+plot(density(df$pollinator_abundance), main="Density Plot of Pollinator Abundance", xlab="Pollinator Abundance")
+#safe mode function
+mode_all <- function(x) {
+  x <- x[!is.na(x)]
+  if (length(x) == 0) return(NA)
+  ux <- unique(x)
+  tab <- tabulate(match(x, ux))
+  ux[tab == max(tab)]
+}
+#summary stats
+
+summary_stats <- df %>%
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "value") %>%
+  group_by(variable) %>%
+  summarise(
+    n = sum(!is.na(value)),
+    mean = mean(value, na.rm = TRUE),
+    median = median(value, na.rm = TRUE),
+    mode = paste(mode_all(value), collapse = "; "),   # may be multiple modes
+    min = min(value, na.rm = TRUE),
+    max = max(value, na.rm = TRUE),
+    range_width = max - min,
+    q1 = quantile(value, 0.25, na.rm = TRUE),
+    q3 = quantile(value, 0.75, na.rm = TRUE),
+    iqr = IQR(value, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+summary_stats
+
+print(df_zscores)
+#boxplot for df scores
+par(mar=c(9,3,2,1))
+boxplot(df_zscores, main = "Boxplot for All Variables dfscores",las = 2, names = c("Butterfly Abundance", "Hedge Height","Av. Temperature","Vegetation Density", "Pollinator Abundance"), main = "Boxplot for All Variables",
+        col = c("royalblue2","red","sienna","palevioletred","lightblue"),
+        border = "darkblue",
+        outline = TRUE)
+
+#create scenarios
+df_A <- df
+df_B <- df %>% distinct()
+
+
+# --- Mode function (works in Posit Cloud) ---
+mode_all <- function(x) {
+  x <- x[!is.na(x)]
+  if (length(x) == 0) return(NA_character_)
+  ux  <- unique(x)
+  tab <- tabulate(match(x, ux))
+  paste(ux[tab == max(tab)], collapse = "; ")
+}
+
+
+# --- Summary function ---
+summarise_stats <- function(dat, scenario_label) {
+  dat %>%
+    pivot_longer(
+      cols = where(is.numeric),
+      names_to = "variable",
+      values_to = "value"
+    ) %>%
+    group_by(variable) %>%
+    summarise(
+      scenario = scenario_label,
+      n       = sum(!is.na(value)),
+      mean    = mean(value, na.rm = TRUE),
+      median  = median(value, na.rm = TRUE),
+      mode    = mode_all(value),
+      min     = min(value, na.rm = TRUE),
+      max     = max(value, na.rm = TRUE),
+      range   = max - min,
+      q1      = quantile(value, 0.25, na.rm = TRUE),
+      q3      = quantile(value, 0.75, na.rm = TRUE),
+      iqr     = IQR(value, na.rm = TRUE),
+      .groups = "drop"
+    )
+}
+
+# --- Create tables ---
+tab_A <- summarise_stats(df_A, "A")
+tab_B <- summarise_stats(df_B, "B")
+
+
+# --- Combine ---
+combined <- tab_A %>%
+  rename_with(~ paste0(.x, "_A"), -variable) %>%
+  left_join(
+    tab_B %>%
+      rename_with(~ paste0(.x, "_B"), -variable),
+    by = "variable"
+  ) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3)))
+
+combined
+
+# --- Save output ---
+write_csv(combined, "combined_stats_scenarios_A_B.csv")
+
+#review outliers
+df_outliers <- df %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "value") %>%
+  group_by(variable) %>%
+  mutate(
+    Q1 = quantile(value, 0.25, na.rm = TRUE),
+    Q3 = quantile(value, 0.75, na.rm = TRUE),
+    IQR = IQR(value, na.rm = TRUE),
+    lower = Q1 - 1.5 * IQR,
+    upper = Q3 + 1.5 * IQR,
+    is_outlier = value < lower | value > upper
+  )
+
+df_outliers %>% filter(is_outlier == TRUE)
+
+#Z-scores for different scenario's
+dfA_zscores <- scale(df_A)
+dfA_zscores
+print(dfA_zscores)
+View(dfA_zscores)
+
+dfB_zscores <- scale(df_B)
+dfB_zscores
+print(dfB_zscores)
+View(dfB_zscores)
+
+#Boxplot for z-scores for both scenarios
+boxplot(dfA_zscores, main = "Standardised Boxplot for Scenario A",las = 2, names = c("Butterfly Abundance", "Hedge Height","Av. Temperature","Vegetation Density", "Pollinator Abundance"),
+        col = c("royalblue2","red","sienna","palevioletred","lightblue"),
+        border = "darkblue",
+        outline = TRUE,)
+
+boxplot(dfB_zscores, main = "Standardised Boxplot for Scenario B",las = 2, names = c("Butterfly Abundance", "Hedge Height","Av. Temperature","Vegetation Density", "Pollinator Abundance"),
+        col = c("royalblue2","red","sienna","palevioletred","lightblue"),
+        border = "darkblue",
+        outline = TRUE,)
+
+# View the standardised data
+head(dfA_zscores)
+head(dfB_zscores)
+
+# --- Save output ---
+write_csv(dfA_zscores, "dfA_zscores")
+
+
+# What is it?
+class(dfA_zscores)
+str(dfA_zscores)
+
+#Convert to table
+dfA_zscores_tbl <- as_tibble(dfA_zscores)
+dfB_zscores_tbl <- as_tibble(dfB_zscores)
+
+#append a row_id so you can re-merge later if needed
+dfA_zscores_tbl <- dfA_zscores_tbl %>%
+  mutate(row_id = row_number(), .before = 1)
+dfB_zscores_tbl <- dfB_zscores_tbl %>%
+  mutate(row_id = row_number(), .before = 1)
+
+# Write to CSV
+readr::write_csv(dfA_zscores_tbl, "dfA_zscores.csv")
+readr::write_csv(dfB_zscores_tbl, "dfB_zscores.csv")
